@@ -2,6 +2,11 @@ import React, { Component } from 'react';
 import uuid from 'uuid/v1';
 import PropTypes from 'prop-types';
 
+// Redux
+import { connect } from 'react-redux';
+import { agregarCita } from '../actions/citasActions';
+import { showError } from '../actions/errorActions';
+
 class AgregarCita extends Component {
 
     // Refs
@@ -11,16 +16,12 @@ class AgregarCita extends Component {
     horaRef = React.createRef();
     sintomasRef = React.createRef();
 
-    state = {
-        error: false,
-    }
-
     crearNuevaCita = (e) => {
         e.preventDefault();
 
         const cita = {
             id: uuid(),
-            nombreMascota: this.nombreMascotaRef.current.value,
+            mascota: this.nombreMascotaRef.current.value,
             propietario: this.propietarioMascotaRef.current.value,
             fecha: this.fechaRef.current.value,
             hora: this.horaRef.current.value,
@@ -29,20 +30,17 @@ class AgregarCita extends Component {
 
         if (cita.nombreMascota === '' || cita.propietario === '' || cita.fecha === '' || cita.hora === '' || cita.sintomas === '') {
             console.log('Faltan campos');
-            this.setState({
-                error: true,
-            })
+            this.props.showError(true);
         } else {
-            this.setState({
-                error: false,
-            })
-            this.props.crearCita(cita);
+            this.props.showError(false);
+            this.props.agregarCita(cita);
             e.currentTarget.reset();
         }
     }
 
     render() {
-        const error = this.state.error;
+        const error = this.props.error;
+        console.log(this.props);
         return (
             <div className="card mt-5">
                 <div className="card-body">
@@ -96,4 +94,9 @@ AgregarCita.propTypes = {
     crearCita: PropTypes.func.isRequired
 }
 
-export default AgregarCita;
+const mapStateToProps = state => ({
+    citas: state.citas.citas,
+    error: state.error.error
+});
+
+export default connect(mapStateToProps, { agregarCita, showError })(AgregarCita);
